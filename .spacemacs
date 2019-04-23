@@ -315,12 +315,12 @@ layers configuration.
 This is the place where most of your configurations should be done. Unless it is
 explicitly specified that a variable should be set before a package is loaded,
 you should place your code here."
-;;  (setq set-default)
+  ;;  magit layer
   (setq org-agenda-files '("~/org_agenda/"))
   (setq magit-repository-directories '("~/development/hello-world/"))
-  (setq c-basic-offset 4
-        c-indentation-style "k&r"
-        c-set-style "k&r")
+  ;; c-c++ layer
+  (setq c-default-style "k&r"
+        c-basic-offset 4)
   )
 
 ;; Do not write anything past this comment. This is where Emacs will
