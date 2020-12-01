@@ -36,19 +36,65 @@ values."
      ;; Uncomment some layer names and press <SPC f e R> (Vim style) or
      ;; <M-m f e R> (Emacs style) to install them.
      ;; ----------------------------------------------------------------
-     helm
-     auto-completion
+     csv
+     yaml
+     ;; helm
+     ivy
      emacs-lisp
-     git
-     c-c++
-     cscope
-     markdown
+     ;; imenu-list
+     (python :variables
+             python-backend 'anaconda)
+     ;; cscope
      org
-     semantic
+     git
+     markdown
+     (ietf :variables
+           ietf-docs-cache "~/Documents/emacs/ietf-docs-cache")
+     lsp
+     (c-c++ :variables
+            c-c++-backend 'lsp-ccls
+            ;; c-c++-backend 'lsp-clangd
+            c-c++-lsp-enable-semantic-highlight 'rainbow
+            c-c++-adopt-subprojects t
+            ;; c-c++-lsp-sem-highlight-method 'font-lock
+            ;; c-c++-default-mode-for-headers 'c++-mode
+            )
+
+     ;; graphviz
+     (plantuml :variables
+               plantuml-jar-path "~/.emacs.d/site-lisp/plantuml.jar"
+               ;; plantuml-default-exec-mode 'jar
+               plantuml-default-exec-mode 'server
+               org-plantuml-jar-path "~/.emacs.d/site-lisp/plantuml.jar"
+               )
+     (yang :variables
+           yang-pyang-rules "ietf")
+
+     ;; (xclipboard :variables
+     ;;             xclipboard-enable-cliphist t
+     ;;             xclipboard-copy-command "~/proj/xclip/bin/xclip"
+     ;;             )
+
+     ;; (auto-completion :variables
+     ;;                  auto-completion-enable-snippets-in-popup t
+     ;;                  spacemacs-default-company-backends '(company-files company-lsp)
+     ;;                  auto-completion-enable-sort-by-usage t
+     ;;                  auto-completion-return-key-behavior 'complete
+     ;;                  auto-completion-tab-key-behavior 'cycle
+     ;;                  auto-completion-complete-with-key-sequence 'jk
+     ;;                  auto-completion-complete-with-key-sequence-delay 0.1
+     ;;                  auto-completion-private-snippets-directory nil
+     ;;                  )
+     (treemacs :variables
+               treemacs-use-follow-mode 'tag
+               treemacs-use-git-mode    'deferred)
+
+     (shell :variables
+            shell-default-height 30
+            shell-default-position 'bottom)
+
      ;; better-defaults
-     ;; (shell :variables
-     ;;        shell-default-height 30
-     ;;        shell-default-position 'bottom)
+     ;; ycmd
      ;; spell-checking
      ;; syntax-checking
      ;; version-control
@@ -61,7 +107,8 @@ values."
    ;; A list of packages that cannot be updated.
    dotspacemacs-frozen-packages '()
    ;; A list of packages that will not be installed and loaded.
-   dotspacemacs-excluded-packages '(company)
+   ;; dotspacemacs-excluded-packages '(company)
+   dotspacemacs-excluded-packages '()
    ;; Defines the behaviour of Spacemacs when installing packages.
    ;; Possible values are `used-only', `used-but-keep-unused' and `all'.
    ;; `used-only' installs only explicitly used packages and uninstall any
@@ -304,23 +351,7 @@ executes.
  This function is mostly useful for variables that need to be set
 before packages are loaded. If you are unsure, you should try in setting them in
 `dotspacemacs/user-config' first."
-  (setq-default git-magit-status-fullscreen t
-                ;; (setq-default default-tab-width 4)
-                ;; (setq-default git-enable-magit-svn-plugin t)
-                dotspacemacs-configuration-layers '(
-                                                    (c-c++ :variables
-                                                           c-c++-default-mode-for-headers 'c++-mode
-                                                           c-c++-enable-clang-support t)
-                                                    (auto-completion :variables
-                                                                     auto-completion-return-key-behavior 'complete
-                                                                     auto-completion-tab-key-behavior 'cycle
-                                                                     auto-completion-complete-with-key-sequence nil
-                                                                     auto-completion-complete-with-key-sequence-delay 0.1
-                                                                     auto-completion-private-snippets-directory nil
-                                                                     auto-completion-enable-sort-by-usage t)
-                                                    ))
   )
-
 
 (defun dotspacemacs/user-config ()
   "Configuration function for user code.
@@ -329,18 +360,37 @@ layers configuration.
 This is the place where most of your configurations should be done. Unless it is
 explicitly specified that a variable should be set before a package is loaded,
 you should place your code here."
-;;  (setq set-default)
-  ;; (global-company-mode)
-  (setq org-agenda-files '("~/org_agenda/"))
-  (setq magit-repository-directories '("~/development/hello-world/"))
-  (setq c-basic-offset 4
-        c-set-style "k&r")
-  ;; ;; Bind clang-format-region to C-M-tab in all modes:
-  ;; (global-set-key [C-M-tab] 'clang-format-region)
-  ;; ;; Bind clang-format-buffer to tab on the c++-mode only:
-  ;; (add-hook 'c++-mode-hook 'clang-format-bindings)
-  ;; (defun clang-format-bindings ()
-  ;;   (define-key c++-mode-map [tab] 'clang-format-buffer))
+  ;; c-c++ layers
+  (setq c-default-style "k&r"
+        c-basic-offset 4)
+
+  ;; magit layers
+  (setq git-magit-status-fullscreen t
+        ;; magit-repository-directories "/repo/eenliwu/epg/")
+        )
+
+  ;; lsp-common
+  (setq
+        lsp-enable-file-watchers nil
+        lsp-completion-provider :capf
+        lsp-treemacs-tree t
+        lsp-treemacs-sync-mode 1
+        ;; lsp-file-watch-threshold 1000000
+        ;; lsp-enable-completion-at-point t
+        ;; lsp-lens-auto-enable t
+        )
+
+  ;; lsp-ccls
+  (setq ccls-executable "/home/eenliwu/ccls/bin/ccls"
+        )
+
+  ;; lsp-clangd
+  (setq lsp-clients-clangd-executable "/home/eenliwu/Downloads/clang+llvm-11.0.0-x86_64-linux-gnu-ubuntu-16.04/bin/clangd"
+        lsp-clients-clangd-args '("--background-index" "--folding-ranges" "--pch-storage=memory" "--compile_args_from=filesystem" "-log=error" "-j=4")
+        )
+
+  ;; ripgrep
+  (evil-leader/set-key "/" 'counsel-grep)
   )
 
 ;; Do not write anything past this comment. This is where Emacs will
@@ -352,7 +402,7 @@ you should place your code here."
  ;; If there is more than one, they won't work right.
  '(package-selected-packages
    (quote
-    (org-projectile org-category-capture org-present org-pomodoro alert log4e gntp org-mime org-download htmlize gnuplot helm-cscope xcscope disaster company-c-headers cmake-mode clang-format irony-eldoc flycheck-irony company-irony-c-headers company-irony irony helm-company helm-c-yasnippet fuzzy flycheck-pos-tip pos-tip flycheck company-statistics auto-yasnippet yasnippet ac-ispell auto-complete counsel-gtags company mmm-mode markdown-toc markdown-mode gh-md smeargle orgit magit-gitflow helm-gitignore gitignore-mode gitconfig-mode gitattributes-mode git-timemachine git-messenger git-link evil-magit magit magit-popup git-commit ghub treepy let-alist graphql with-editor ws-butler winum which-key volatile-highlights vi-tilde-fringe uuidgen use-package toc-org spaceline powerline restart-emacs request rainbow-delimiters popwin persp-mode pcre2el paradox spinner org-plus-contrib org-bullets open-junk-file neotree move-text macrostep lorem-ipsum linum-relative link-hint indent-guide hydra hungry-delete hl-todo highlight-parentheses highlight-numbers parent-mode highlight-indentation helm-themes helm-swoop helm-projectile helm-mode-manager helm-make projectile pkg-info epl helm-flx helm-descbinds helm-ag google-translate golden-ratio flx-ido flx fill-column-indicator fancy-battery eyebrowse expand-region exec-path-from-shell evil-visualstar evil-visual-mark-mode evil-unimpaired evil-tutor evil-surround evil-search-highlight-persist evil-numbers evil-nerd-commenter evil-mc evil-matchit evil-lisp-state smartparens evil-indent-plus evil-iedit-state iedit evil-exchange evil-escape evil-ediff evil-args evil-anzu anzu evil goto-chg undo-tree eval-sexp-fu highlight elisp-slime-nav dumb-jump f dash s diminish define-word column-enforce-mode clean-aindent-mode bind-map bind-key auto-highlight-symbol auto-compile packed aggressive-indent adaptive-wrap ace-window ace-link ace-jump-helm-line helm avy helm-core popup async))))
+    (yapfify yaml-mode xterm-color shell-pop pyvenv pytest pyenv-mode py-isort plantuml-mode pip-requirements multi-term mmm-mode markdown-toc markdown-mode live-py-mode hy-mode dash-functional helm-pydoc graphviz-dot-mode gh-md eshell-z eshell-prompt-extras esh-help cython-mode csv-mode anaconda-mode pythonic smeargle orgit org-projectile org-category-capture org-present org-pomodoro alert log4e gntp org-mime org-download magit-gitflow imenu-list htmlize helm-gitignore helm-cscope xcscope helm-company helm-c-yasnippet gnuplot gitignore-mode gitconfig-mode gitattributes-mode git-timemachine git-messenger git-link fuzzy evil-magit magit magit-popup git-commit ghub treepy graphql with-editor disaster company-ycmd ycmd request-deferred deferred company-statistics company-c-headers company cmake-mode clang-format auto-yasnippet yasnippet ac-ispell auto-complete ws-butler winum which-key volatile-highlights vi-tilde-fringe uuidgen use-package toc-org spaceline restart-emacs request rainbow-delimiters popwin persp-mode pcre2el paradox org-plus-contrib org-bullets open-junk-file neotree move-text macrostep lorem-ipsum linum-relative link-hint indent-guide hungry-delete hl-todo highlight-parentheses highlight-numbers highlight-indentation helm-themes helm-swoop helm-projectile helm-mode-manager helm-make helm-flx helm-descbinds helm-ag google-translate golden-ratio flx-ido fill-column-indicator fancy-battery eyebrowse expand-region exec-path-from-shell evil-visualstar evil-visual-mark-mode evil-unimpaired evil-tutor evil-surround evil-search-highlight-persist evil-numbers evil-nerd-commenter evil-mc evil-matchit evil-lisp-state evil-indent-plus evil-iedit-state evil-exchange evil-escape evil-ediff evil-args evil-anzu eval-sexp-fu elisp-slime-nav dumb-jump diminish define-word column-enforce-mode clean-aindent-mode auto-highlight-symbol auto-compile aggressive-indent adaptive-wrap ace-window ace-link ace-jump-helm-line))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
@@ -371,7 +421,7 @@ This function is called at the very end of Spacemacs initialization."
  ;; If there is more than one, they won't work right.
  '(package-selected-packages
    (quote
-    (stickyfunc-enhance org-projectile org-category-capture org-present org-pomodoro alert log4e gntp org-mime org-download htmlize gnuplot helm-cscope xcscope disaster company-c-headers cmake-mode clang-format irony-eldoc flycheck-irony company-irony-c-headers company-irony irony helm-company helm-c-yasnippet fuzzy flycheck-pos-tip pos-tip flycheck company-statistics auto-yasnippet yasnippet ac-ispell auto-complete counsel-gtags company mmm-mode markdown-toc markdown-mode gh-md smeargle orgit magit-gitflow helm-gitignore gitignore-mode gitconfig-mode gitattributes-mode git-timemachine git-messenger git-link evil-magit magit magit-popup git-commit ghub treepy let-alist graphql with-editor ws-butler winum which-key volatile-highlights vi-tilde-fringe uuidgen use-package toc-org spaceline powerline restart-emacs request rainbow-delimiters popwin persp-mode pcre2el paradox spinner org-plus-contrib org-bullets open-junk-file neotree move-text macrostep lorem-ipsum linum-relative link-hint indent-guide hydra hungry-delete hl-todo highlight-parentheses highlight-numbers parent-mode highlight-indentation helm-themes helm-swoop helm-projectile helm-mode-manager helm-make projectile pkg-info epl helm-flx helm-descbinds helm-ag google-translate golden-ratio flx-ido flx fill-column-indicator fancy-battery eyebrowse expand-region exec-path-from-shell evil-visualstar evil-visual-mark-mode evil-unimpaired evil-tutor evil-surround evil-search-highlight-persist evil-numbers evil-nerd-commenter evil-mc evil-matchit evil-lisp-state smartparens evil-indent-plus evil-iedit-state iedit evil-exchange evil-escape evil-ediff evil-args evil-anzu anzu evil goto-chg undo-tree eval-sexp-fu highlight elisp-slime-nav dumb-jump f dash s diminish define-word column-enforce-mode clean-aindent-mode bind-map bind-key auto-highlight-symbol auto-compile packed aggressive-indent adaptive-wrap ace-window ace-link ace-jump-helm-line helm avy helm-core popup async))))
+    (dap-mode posframe bui yapfify yaml-mode xterm-color shell-pop pyvenv pytest pyenv-mode py-isort plantuml-mode pip-requirements multi-term mmm-mode markdown-toc markdown-mode live-py-mode hy-mode dash-functional helm-pydoc graphviz-dot-mode gh-md eshell-z eshell-prompt-extras esh-help cython-mode csv-mode anaconda-mode pythonic smeargle orgit org-projectile org-category-capture org-present org-pomodoro alert log4e gntp org-mime org-download magit-gitflow imenu-list htmlize helm-gitignore helm-cscope xcscope helm-company helm-c-yasnippet gnuplot gitignore-mode gitconfig-mode gitattributes-mode git-timemachine git-messenger git-link fuzzy evil-magit magit magit-popup git-commit ghub treepy graphql with-editor disaster company-ycmd ycmd request-deferred deferred company-statistics company-c-headers company cmake-mode clang-format auto-yasnippet yasnippet ac-ispell auto-complete ws-butler winum which-key volatile-highlights vi-tilde-fringe uuidgen use-package toc-org spaceline restart-emacs request rainbow-delimiters popwin persp-mode pcre2el paradox org-plus-contrib org-bullets open-junk-file neotree move-text macrostep lorem-ipsum linum-relative link-hint indent-guide hungry-delete hl-todo highlight-parentheses highlight-numbers highlight-indentation helm-themes helm-swoop helm-projectile helm-mode-manager helm-make helm-flx helm-descbinds helm-ag google-translate golden-ratio flx-ido fill-column-indicator fancy-battery eyebrowse expand-region exec-path-from-shell evil-visualstar evil-visual-mark-mode evil-unimpaired evil-tutor evil-surround evil-search-highlight-persist evil-numbers evil-nerd-commenter evil-mc evil-matchit evil-lisp-state evil-indent-plus evil-iedit-state evil-exchange evil-escape evil-ediff evil-args evil-anzu eval-sexp-fu elisp-slime-nav dumb-jump diminish define-word column-enforce-mode clean-aindent-mode auto-highlight-symbol auto-compile aggressive-indent adaptive-wrap ace-window ace-link ace-jump-helm-line))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
